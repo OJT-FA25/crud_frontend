@@ -1,79 +1,29 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
+import React, { useState } from "react";
+import RegisterForm from "./components/RegisterForm";
+import LoginForm from "./components/LoginForm";
+import UserList from "./components/UserList";
 
 function App() {
-  const [users, setUsers] = useState([]);
-  const [name, setName] = useState("");
-  const [editId, setEditId] = useState(null);
-
-  // Lấy danh sách users
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
-  const fetchUsers = () => {
-    axios.get("https://localhost:7268/api/users")
-      .then(res => setUsers(res.data))
-      .catch(err => console.error(err));
-  };
-
-  // Thêm user
-  const addUser = () => {
-    if (!name) return;
-    axios.post("https://localhost:7268/api/users", { name })
-      .then(res => {
-        setUsers([...users, res.data]);
-        setName("");
-      })
-      .catch(err => console.error(err));
-  };
-
-  // Sửa user
-  const updateUser = (id) => {
-    axios.put(`https://localhost:7268/api/users/${id}`, { name })
-      .then(res => {
-        setUsers(users.map(u => u.id === id ? res.data : u));
-        setName("");
-        setEditId(null);
-      })
-      .catch(err => console.error(err));
-  };
-
-  // Xóa user
-  const deleteUser = (id) => {
-    axios.delete(`https://localhost:7268/api/users/${id}`)
-      .then(() => {
-        setUsers(users.filter(u => u.id !== id));
-      })
-      .catch(err => console.error(err));
-  };
+  const [token, setToken] = useState(null);
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>CRUD (React + .NET + PostgreSQL)</h1>
+    <div style={{ padding: "20px", fontFamily: "Arial" }}>
+      <h1>CRUD Demo - React + .NET + PostgreSQL</h1>
 
-      <input
-        type="text"
-        placeholder="Enter name"
-        value={name}
-        onChange={e => setName(e.target.value)}
-      />
+      {!token ? (
+        <>
+          <h2>Register</h2>
+          <RegisterForm />
 
-      {editId ? (
-        <button onClick={() => updateUser(editId)}>UPDATE</button>
+          <h2>Login</h2>
+          <LoginForm setToken={setToken} />
+        </>
       ) : (
-        <button onClick={addUser}>ADD</button>
+        <>
+          <h2>Users List</h2>
+          <UserList token={token} />
+        </>
       )}
-
-      <ul>
-        {users.map(u => (
-          <li key={u.id}>
-            {u.name}
-            <button onClick={() => { setEditId(u.id); setName(u.name); }}>FIX</button>
-            <button onClick={() => deleteUser(u.id)}>DEL</button>
-          </li>
-        ))}
-      </ul>
     </div>
   );
 }
